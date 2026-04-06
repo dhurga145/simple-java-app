@@ -217,8 +217,8 @@ Manage Jenkins → Manage Credentials → (System) → Global credentials (unres
 | ----------- | ----------------------- |
 | Kind        | Username with password  |
 | Scope       | Global                  |
-| Username    | your DockerHub username |
-| Password    | your DockerHub password |
+| Username    | your DockerHub username | dhurgajai
+| Password    | your DockerHub password | Balaji.2609
 | ID          | dockerhub-creds         |
 | Description | DockerHub Login         |
 
