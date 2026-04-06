@@ -203,13 +203,15 @@ git push
 
 ---
 
-## 🔐 Step 10: Add DockerHub Credentials
+## 🔐 Step 10 – Add Credentials in Jenkins (DockerHub + Kubernetes)
 
-Go to:
+### 📍 Go to:
 
-```
-Manage Jenkins → Manage Credentials → Global → Add Credentials
-```
+Manage Jenkins → Manage Credentials → (System) → Global credentials (unrestricted) → Add Credentials
+
+---
+
+## ➤ 1. Add DockerHub Credentials
 
 | Field       | Value                   |
 | ----------- | ----------------------- |
@@ -222,9 +224,68 @@ Manage Jenkins → Manage Credentials → Global → Add Credentials
 
 ---
 
-## 🔄 Step 11: Create Jenkins Pipeline
+## ➤ 2. Add Kubernetes Config File (.kubeconfig)
 
-### Pipeline Script
+### 📂 Where to get `.kubeconfig`?
+
+If using Docker Desktop:
+
+📍 Location (Windows):
+C:\Users<your-username>.kube\config
+
+👉 Example:
+C:\Users\djg13.kube\config
+
+✔ This file is automatically created when Kubernetes is enabled in Docker Desktop.
+
+---
+
+### ⚙️ Steps to Upload
+
+1. Click **Add Credentials**
+2. Fill the following:
+
+| Field       | Value                                              |
+| ----------- | -------------------------------------------------- |
+| Kind        | Secret file                                        |
+| File        | Upload the `config` file (or rename to kubeconfig) |
+| ID          | kuberconfig                                        |
+| Description | Kubernetes Config                                  |
+
+---
+
+### 🔍 Verify Kubernetes Config (Optional but Recommended)
+
+Run:
+
+```bash
+kubectl config view
+```
+
+✔ If it shows output → configuration is correct
+
+---
+
+### ⚠️ Important
+
+* Without this file → Kubernetes deployment will FAIL
+* This file is used by Jenkins to connect to the cluster
+
+---
+
+## ⚙️ Step 11 – Create Jenkins Pipeline Job
+
+### 📍 Steps
+
+1. Go to Jenkins Dashboard
+2. Click **New Item**
+3. Enter name: `Java-CICD`
+4. Select **Pipeline**
+5. Click **OK**
+
+---
+
+## 🧾 Pipeline Script
 
 ```groovy
 pipeline {
@@ -272,7 +333,15 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                bat 'kubectl apply -f deployment.yaml'
+                withCredentials([file(
+                    credentialsId: 'kuberconfig',
+                    variable: 'KUBECONFIG'
+                )]) {
+                    bat '''
+                    set KUBECONFIG=%KUBECONFIG%
+                    kubectl apply -f deployment.yaml
+                    '''
+                }
             }
         }
     }
@@ -288,9 +357,16 @@ pipeline {
 }
 ```
 
-👉 Click **Save → Build Now**
+---
+
+## ▶️ Run Pipeline
+
+Click:
+Save → Build Now
 
 ---
+
+
 
 ## 🔍 Step 12: Verify Deployment
 
